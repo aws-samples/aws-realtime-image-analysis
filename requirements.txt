@@ -1,0 +1,19 @@
+aws-cdk.aws-apigateway==1.72.0
+aws-cdk.aws-ec2==1.72.0
+aws-cdk.aws-elasticsearch==1.72.0
+aws-cdk.aws-iam==1.72.0
+aws-cdk.aws-kinesis==1.72.0
+aws-cdk.aws-lambda==1.72.0
+aws-cdk.aws-lambda-event-sources==1.72.0
+aws-cdk.aws-logs==1.72.0
+aws-cdk.aws-s3==1.72.0
+aws-cdk.core==1.72.0
+
+# pip install boto3
+boto3==1.14.13
+botocore==1.17.13
+
+# pip install elasticsearch
+elasticsearch>=7.0.0,<7.11
+requests==2.23.0
+requests-aws4auth==0.9

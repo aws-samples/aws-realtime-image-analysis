@@ -1,0 +1,6 @@
+{
+  "image_bucket_name_suffix": "Your-S3-Bucket-Name-Suffix",
+  "lib_bucket_name": "Your-S3-Bucket-Name-Of-Lib",
+  "s3_access_key_id": "Access-Key-Of-Your-IAM-User-Allowed-To-Access-S3",
+  "s3_secret_key": "Secret-Key-Of-Your-IAM-User-Allowed-To-Access-S3"
+}
