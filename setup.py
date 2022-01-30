@@ -19,7 +19,8 @@ setuptools.setup(
     packages=setuptools.find_packages(where="image_insights"),
 
     install_requires=[
-        "aws-cdk.core",
+        "aws-cdk-lib",
+        "constructs"
     ],
 
     python_requires=">=3.6",
