@@ -80,6 +80,20 @@ cdk를 실행할 때 사용할 IAM User를 생성한 후, `~/.aws/config`에 등
     2019-10-25 08:40:28    1294387 es-lib.zip
     ```
 
+    **참고**
+    + [How do I create a Lambda layer using a simulated Lambda environment with Docker?](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-layer-simulated-docker/)
+        ```
+        $ cat <<EOF > requirements.txt
+        > elasticsearch>=7.0.0,<7.11
+        > requests==2.23.0
+        > requests-aws4auth==0.9
+        > EOF
+        $ docker run -v "$PWD":/var/task "public.ecr.aws/sam/build-python3.7" /bin/sh -c "pip install -r requirements.txt -t python/lib/python3.7/site-packages/; exit"
+        $ zip -r es-lib.zip python > /dev/null
+        $ aws s3 mb s3://my-bucket-for-lambda-layer-packages
+        $ aws s3 cp es-lib.zip s3://my-bucket-for-lambda-layer-packages/var/
+        ```
+
 3. 소스 코드를 git에서 다운로드 받은 후, 아래와 같이 cdk 배포 환경을 구축함
 
     ```shell script

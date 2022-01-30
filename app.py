@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 import os
 
-from aws_cdk import core
+import aws_cdk as cdk
 
 from image_insights.image_insights_stack import ImageInsightsStack
 
 
 ACCOUNT = os.getenv('CDK_DEFAULT_ACCOUNT', '')
 REGION = os.getenv('CDK_DEFAULT_REGION', 'us-east-1')
-AWS_ENV = core.Environment(account=ACCOUNT, region=REGION)
+AWS_ENV = cdk.Environment(account=ACCOUNT, region=REGION)
 
-app = core.App()
+app = cdk.App()
 ImageInsightsStack(app, "image-insights", env=AWS_ENV)
 
 app.synth()

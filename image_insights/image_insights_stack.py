@@ -3,8 +3,10 @@
 
 import os
 
+import aws_cdk as cdk
+
 from aws_cdk import (
-  core,
+  Stack,
   aws_ec2,
   aws_s3 as s3,
   aws_apigateway as apigw,
@@ -14,18 +16,18 @@ from aws_cdk import (
   aws_logs,
   aws_elasticsearch
 )
+from constructs import Construct
 
 from aws_cdk.aws_lambda_event_sources import (
   S3EventSource,
   KinesisEventSource
 )
 
-class ImageInsightsStack(core.Stack):
+class ImageInsightsStack(Stack):
 
-  def __init__(self, scope: core.Construct, id: str, **kwargs) -> None:
-    super().__init__(scope, id, **kwargs)
+  def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+    super().__init__(scope, construct_id, **kwargs)
 
-    # The code that defines your stack goes here
     vpc = aws_ec2.Vpc(self, "ImageInsightsVPC",
       cidr="10.31.0.0/21",
       max_azs=2,
@@ -37,12 +39,12 @@ class ImageInsightsStack(core.Stack):
       #   {
       #     "cidrMask": 24,
       #     "name": "Private",
-      #     "subnetType": aws_ec2.SubnetType.PRIVATE
+      #     "subnetType": aws_ec2.SubnetType.PRIVATE_WITH_NAT
       #   },
       #   {
       #     "cidrMask": 28,
       #     "name": "Isolated",
-      #     "subnetType": aws_ec2.SubnetType.ISOLATED,
+      #     "subnetType": aws_ec2.SubnetType.PRIVATE_ISOLATED,
       #     "reserved": True
       #   }
       # ],
@@ -55,7 +57,7 @@ class ImageInsightsStack(core.Stack):
 
     s3_image_bucket_name_suffix = self.node.try_get_context('image_bucket_name_suffix')
     s3_bucket = s3.Bucket(self, "s3bucket",
-      bucket_name="image-insights-{region}-{suffix}".format(region=core.Aws.REGION, suffix=s3_image_bucket_name_suffix))
+      bucket_name="image-insights-{region}-{suffix}".format(region=cdk.Aws.REGION, suffix=s3_image_bucket_name_suffix))
 
     s3_bucket.add_cors_rule(allowed_methods=[s3.HttpMethods.GET, s3.HttpMethods.POST],
       allowed_origins=['*'],
@@ -70,12 +72,12 @@ class ImageInsightsStack(core.Stack):
       function_name="SignS3Post",
       handler="sign_s3_post.lambda_handler",
       description="Return Signature4 for S3",
-      code=_lambda.Code.asset("./src/main/python/SignS3Post"),
+      code=_lambda.Code.from_asset("./src/main/python/SignS3Post"),
       environment={
         'ACCESS_KEY': s3_access_key_id,
         'SECRET_KEY': s3_secret_key
       },
-      timeout=core.Duration.minutes(5)
+      timeout=cdk.Duration.minutes(5)
     )
     log_group = aws_logs.LogGroup(self, "SignS3PostLogGroup",
       log_group_name="/aws/lambda/SignS3Post",
@@ -134,7 +136,7 @@ class ImageInsightsStack(core.Stack):
             'method.response.header.Content-Type': False
           },
           response_models={
-            'application/json': apigw.EmptyModel()
+            'application/json': apigw.Model.EMPTY_MODEL
           }
         ),
         apigw.MethodResponse(status_code="400"),
@@ -163,7 +165,7 @@ class ImageInsightsStack(core.Stack):
             'method.response.header.Access-Control-Allow-Origin': True
           },
           response_models={
-            'application/json': apigw.EmptyModel()
+            'application/json': apigw.Model.EMPTY_MODEL
           }
         ),
         apigw.MethodResponse(status_code="400"),
@@ -198,7 +200,7 @@ class ImageInsightsStack(core.Stack):
             'method.response.header.Content-Type': False
           },
           response_models={
-            'application/json': apigw.EmptyModel()
+            'application/json': apigw.Model.EMPTY_MODEL
           }
         ),
         apigw.MethodResponse(status_code="400"),
@@ -236,7 +238,7 @@ class ImageInsightsStack(core.Stack):
             'method.response.header.Content-Type': False
           },
           response_models={
-            'application/json': apigw.EmptyModel()
+            'application/json': apigw.Model.EMPTY_MODEL
           }
         ),
         apigw.MethodResponse(status_code="400"),
@@ -276,7 +278,7 @@ class ImageInsightsStack(core.Stack):
             'method.response.header.Content-Type': False
           },
           response_models={
-            'application/json': apigw.EmptyModel()
+            'application/json': apigw.Model.EMPTY_MODEL
           }
         ),
         apigw.MethodResponse(status_code="400"),
@@ -297,12 +299,12 @@ class ImageInsightsStack(core.Stack):
       function_name="TriggerImageAutoTagger",
       handler="trigger_image_auto_tagger.lambda_handler",
       description="Trigger to recognize an image in S3",
-      code=_lambda.Code.asset("./src/main/python/TriggerImageAutoTagger"),
+      code=_lambda.Code.from_asset("./src/main/python/TriggerImageAutoTagger"),
       environment={
-        'REGION_NAME': core.Aws.REGION,
+        'REGION_NAME': cdk.Aws.REGION,
         'KINESIS_STREAM_NAME': img_kinesis_stream.stream_name
       },
-      timeout=core.Duration.minutes(5)
+      timeout=cdk.Duration.minutes(5)
     )
 
     trigger_img_tagger_lambda_fn.add_to_role_policy(aws_iam.PolicyStatement(
@@ -336,7 +338,7 @@ class ImageInsightsStack(core.Stack):
       description='security group for an bastion host',
       security_group_name='image-insights-bastion-host-sg'
     )
-    core.Tags.of(sg_bastion_host).add('Name', 'image-insights-bastion-host-sg')
+    cdk.Tags.of(sg_bastion_host).add('Name', 'image-insights-bastion-host-sg')
 
     #XXX: https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_ec2/InstanceClass.html
     #XXX: https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_ec2/InstanceSize.html#aws_cdk.aws_ec2.InstanceSize
@@ -362,7 +364,7 @@ class ImageInsightsStack(core.Stack):
       description='security group for elasticsearch client of image tagger',
       security_group_name='use-image-tagger-es'
     )
-    core.Tags.of(sg_use_es).add('Name', 'sg-use-image-tagger-es')
+    cdk.Tags.of(sg_use_es).add('Name', 'sg-use-image-tagger-es')
 
     sg_es = aws_ec2.SecurityGroup(self, "ImageTagSearchSG",
       vpc=vpc,
@@ -370,7 +372,7 @@ class ImageInsightsStack(core.Stack):
       description='security group for elasticsearch of image tag',
       security_group_name='image-tagger-es'
     )
-    core.Tags.of(sg_es).add('Name', 'sg-image-tagger-es')
+    cdk.Tags.of(sg_es).add('Name', 'sg-image-tagger-es')
 
     sg_es.add_ingress_rule(peer=sg_es, connection=aws_ec2.Port.all_tcp(), description='image-tagger-es')
     sg_es.add_ingress_rule(peer=sg_use_es, connection=aws_ec2.Port.all_tcp(), description='use-image-tagger-es')
@@ -418,14 +420,14 @@ class ImageInsightsStack(core.Stack):
       },
       vpc_options={
         "securityGroupIds": [sg_es.security_group_id],
-        "subnetIds": vpc.select_subnets(subnet_type=aws_ec2.SubnetType.PRIVATE).subnet_ids
+        "subnetIds": vpc.select_subnets(subnet_type=aws_ec2.SubnetType.PRIVATE_WITH_NAT).subnet_ids
       }
     )
-    core.Tags.of(es_cfn_domain).add('Name', 'image-tagger-es')
+    cdk.Tags.of(es_cfn_domain).add('Name', 'image-tagger-es')
 
     #XXX: https://github.com/aws/aws-cdk/issues/1342
     s3_lib_bucket_name = self.node.try_get_context('lib_bucket_name')
-    s3_lib_bucket = s3.Bucket.from_bucket_name(self, id, s3_lib_bucket_name)
+    s3_lib_bucket = s3.Bucket.from_bucket_name(self, construct_id, s3_lib_bucket_name)
     es_lib_layer = _lambda.LayerVersion(self, "ESLib",
       layer_version_name="es-lib",
       compatible_runtimes=[_lambda.Runtime.PYTHON_3_7],
@@ -438,13 +440,13 @@ class ImageInsightsStack(core.Stack):
       function_name="AutomaticImageTagger",
       handler="image_auto_tagger.lambda_handler",
       description="Automatically tag images",
-      code=_lambda.Code.asset("./src/main/python/ImageAutoTagger"),
+      code=_lambda.Code.from_asset("./src/main/python/ImageAutoTagger"),
       environment={
         'ES_HOST': es_cfn_domain.attr_domain_endpoint,
         'ES_INDEX': 'image_insights',
         'ES_TYPE': 'photo'
       },
-      timeout=core.Duration.minutes(5),
+      timeout=cdk.Duration.minutes(5),
       layers=[es_lib_layer],
       security_groups=[sg_use_es],
       vpc=vpc
@@ -467,6 +469,11 @@ class ImageInsightsStack(core.Stack):
       log_group_name="/aws/lambda/AutomaticImageTagger",
       retention=aws_logs.RetentionDays.THREE_DAYS)
     log_group.grant_write(auto_img_tagger_lambda_fn)
+
+    cdk.CfnOutput(self, 'BastionHostId', value=bastion_host.instance_id, export_name='BastionHostId')
+    cdk.CfnOutput(self, 'BastionHostPublicDNSName', value=bastion_host.instance_public_dns_name, export_name='BastionHostPublicDNSName')
+    cdk.CfnOutput(self, 'ESDomainEndpoint', value=es_cfn_domain.attr_domain_endpoint, export_name='ESDomainEndpoint')
+    cdk.CfnOutput(self, 'ESDashboardsURL', value=f"{es_cfn_domain.attr_domain_endpoint}/_dashboards/", export_name='ESDashboardsURL')
 
 
   def add_cors_options(self, apigw_resource):
@@ -491,7 +498,7 @@ class ImageInsightsStack(core.Stack):
           'method.response.header.Access-Control-Allow-Origin': True,
         },
         response_models={
-            'application/json': apigw.EmptyModel()
+            'application/json': apigw.Model.EMPTY_MODEL
         }),
         apigw.MethodResponse(status_code="400"),
         apigw.MethodResponse(status_code="500")
