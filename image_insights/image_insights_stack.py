@@ -291,7 +291,9 @@ class ImageInsightsStack(Stack):
       }
     )
 
-    img_kinesis_stream = kinesis.Stream(self, "ImageAutoTaggerUploadedImagePath", stream_name="image-auto-tagger-img")
+    img_kinesis_stream = kinesis.Stream(self, "ImageAutoTaggerUploadedImagePath", stream_name="image-auto-tagger-img",
+      # ON-DEMAND capacity mode: the stream will autoscale and be billed according to the volume of data ingested and retrieved
+      stream_mode=kinesis.StreamMode.ON_DEMAND)
 
     # create lambda function
     trigger_img_tagger_lambda_fn = _lambda.Function(self, "TriggerImageAutoTagger",
