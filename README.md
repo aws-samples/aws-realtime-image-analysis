@@ -81,7 +81,7 @@ cdk를 실행할 때 사용할 IAM User를 생성한 후, `~/.aws/config`에 등
     ```
 
     **참고**
-    + [How do I create a Lambda layer using a simulated Lambda environment with Docker?](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-layer-simulated-docker/)
+    + [Docker와 함께 시뮬레이션된 Lambda 환경을 사용하여 Lambda 계층을 생성하려면 어떻게 하나요? (How do I create a Lambda layer using a simulated Lambda environment with Docker?)](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-layer-simulated-docker/)
         ```
         $ cat <<EOF > requirements.txt
         > elasticsearch>=7.0.0,<7.11
