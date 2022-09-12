@@ -139,12 +139,12 @@ cdk를 실행할 때 사용할 IAM User를 생성한 후, `~/.aws/config`에 등
 
 6. `cdk deploy` 명령어를 이용해서 배포한다.
     ```shell script
-    (.env) $ cdk --profile=cdk_user deploy
+    (.env) $ cdk --profile=cdk_user deploy --all
     ```
 
 7. 배포한 애플리케이션을 삭제하려면, `cdk destroy` 명령어를 아래와 같이 실행
     ```shell script
-    (.env) $ cdk --profile cdk_user destroy
+    (.env) $ cdk --profile cdk_user destroy --all
     ```
 
 8. 배포가 완료되면, API Gateway 웹 콘솔 접속해서 이미지 Uploader API의 **Binary Media Types** 설정이
