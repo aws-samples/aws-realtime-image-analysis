@@ -17,8 +17,12 @@ class ImageInsightsKinesisStreamStack(Stack):
 
     img_kinesis_stream = kinesis.Stream(self, "ImageAutoTaggerUploadedImagePath",
       stream_name="image-auto-tagger-img",
-      # ON-DEMAND capacity mode: the stream will autoscale and be billed according to the volume of data ingested and retrieved
+      # ON-DEMAND capacity mode: the stream will autoscale and 
+      # be billed according to the volume of data ingested and retrieved
       stream_mode=kinesis.StreamMode.ON_DEMAND)
 
     self.kinesis_stream = img_kinesis_stream
+
+    cdk.CfnOutput(self, '{self.stack_name}_KinesisStreamArn',
+      value=self.kinesis_stream.stream_arn)
 

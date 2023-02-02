@@ -3,6 +3,8 @@ from .s3 import ImageInsightsS3Stack
 from .apigw import ImageInsightsApiGwStack
 from .kds import ImageInsightsKinesisStreamStack
 from .image_tagger_trigger_lambda import ImageTaggerTriggerLambdaStack
+from .image_tagger_lambda_s3_event_source import ImageTaggerLambdaS3EventSourceStack
 from .bastion_host import BastionHostStack
 from .elasticsearch import ImageInsightsElasticsearchStack
+from .ops import ImageInsightsOpenSearchStack
 from .image_tagger_lambda import ImageTaggerLambdaStack

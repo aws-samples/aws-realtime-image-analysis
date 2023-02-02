@@ -34,6 +34,7 @@ class ImageInsightsApiGwStack(Stack):
     )
     log_group = aws_logs.LogGroup(self, "SignS3PostLogGroup",
       log_group_name="/aws/lambda/SignS3Post",
+      removal_policy=cdk.RemovalPolicy.DESTROY, #XXX: for testing
       retention=aws_logs.RetentionDays.THREE_DAYS)
     log_group.grant_write(sign_s3_post_lambda_fn)
 
@@ -243,6 +244,8 @@ class ImageInsightsApiGwStack(Stack):
         'method.request.path.item': True
       }
     )
+
+    cdk.CfnOutput(self, '{self.stack_name}_ApiEndpoint', value=api.url)
 
 
   def add_cors_options(self, apigw_resource):

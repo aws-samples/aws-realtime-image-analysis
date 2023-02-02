@@ -1,11 +1,12 @@
 # Project Description
 
-- Amazon Rekognition을 활용한 이미지 자동 태킹 및 이미지 태그 데이터 시각화 서비스
-- (1) 아래와 같이 이미지를 업로드 하면,
+- Automatic tagging images and visualization of tags from the images with Amazon Rekognition
+- (1) For images uploaded like this:
 ![demo_upload_image_files](assets/demo-upload-image-files.png)
-- (2) 다음과 같이 이미지 태그 데이터의 분석 결과를 보여준다.
+- (2) Visualize the analysis results of taggs automatically extracted from images
 ![demo_image_tags_visualization](assets/demo-image-tags-visualization.png)
 
+  * Read this in other languages: [English](README.md), [Korea(한국어)](README.kr.md)
 
 ### Architecture
 ![auto_image_tagger-architecture](auto_image_tagger_arch.png)
@@ -29,8 +30,8 @@
 
     | URL Path parameters | Description | Required(Yes/No) | Data Type |
     |---------------------|-------------|------------------|-----------|
-    | bucket | s3 bucket 이름 | Yes | String |
-    | object | s3 object 이름 | Yes | String |
+    | bucket | s3 bucket name | Yes | String |
+    | object | s3 object name (image file name) | Yes | String |
 
   - ex)
     ```
@@ -43,9 +44,9 @@
 
 
 ### How To Build & Deploy
-1. [Getting Started With the AWS CDK](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html)를 참고해서 cdk를 설치하고,
-cdk를 실행할 때 사용할 IAM User를 생성한 후, `~/.aws/config`에 등록함
-예를 들어서, **cdk_user**라는 IAM User를 생성 한 후, 아래와 같이 `~/.aws/config`에 추가로 등록함
+1. Install AWS CDK based on [Getting Started With the AWS CDK](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html), and create and register a new IAM User to deploy CDK Stacks into `~/.aws/config`.
+
+    For example, create the IAM User, **cdk_user** and register it into `~/.aws/config`.
 
     ```shell script
     $ cat ~/.aws/config
@@ -54,25 +55,27 @@ cdk를 실행할 때 사용할 IAM User를 생성한 후, `~/.aws/config`에 등
     aws_secret_access_key=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
     region=us-east-1
     ```
-    :information_source: **cdk_user** 는 임시로 `AdministratorAccess` 권한을 부여한다.
+    :information_source: **cdk_user** needs `AdministratorAccess` IAM Policy.
 
-2. Lambda Layer에 등록할 Python 패키지를 생성해서 s3 bucket에 저장함<br/>
-   예를 들어, Lambda Layer에 등록할 elasticsearch 패키지를 아래와 같은 방식으로 생함
+2. Upload Python Packages for Lambda Layer into S3 bucket<br/>
+   For example, if we are uploading `elasticsearch` python packages to S3 bucket,
+
+   (1) create the packages
 
     ```shell script
-    $ python3 -m venv es-lib # virtual environments을 생성함
+    $ python3 -m venv es-lib
     $ cd es-lib
     $ source bin/activate
-    (es-lib) $ mkdir -p python_modules # 필요한 패키지를 저장할 디렉터리 생성
-    (es-lib) $ pip install 'elasticsearch>=7.0.0,<7.11' requests requests-aws4auth -t python_modules # 필요한 패키지를 사용자가 지정한 패키지 디렉터리에 저장함
-    (es-lib) $ mv python_modules python # 사용자가 지정한 패키지 디렉터리 이름을 python으로 변경함 (python 디렉터리에 패키지를 설치할 경우 에러가 나기 때문에 다른 이름의 디렉터리에 패키지를 설치 후, 디렉터리 이름을 변경함)
-    (es-lib) $ zip -r es-lib.zip python/ # 필요한 패키지가 설치된 디렉터리를 압축함
-    (es-lib) $ aws s3 mb s3://my-bucket-for-lambda-layer-packages # 압축한 패키지를 업로드할 s3 bucket을 생성함
-    (es-lib) $ aws s3 cp es-lib.zip s3://my-bucket-for-lambda-layer-packages/var/ # 압축한 패키지를 s3에 업로드 한 후, lambda layer에 패키지를 등록할 때, s3 위치를 등록하면 됨
+    (es-lib) $ mkdir -p python_modules
+    (es-lib) $ pip install 'elasticsearch>=7.0.0,<7.11' requests requests-aws4auth -t python_modules
+    (es-lib) $ mv python_modules python
+    (es-lib) $ zip -r es-lib.zip python/
+    (es-lib) $ aws s3 mb s3://my-bucket-for-lambda-layer-packages
+    (es-lib) $ aws s3 cp es-lib.zip s3://my-bucket-for-lambda-layer-packages/var/
     (es-lib) $ deactivate
     ```
 
-    elasticsearch 패키지를 Lambda Layer에 등록 할 수 있도록 image-insights-resources라는 이름의 s3 bucket을 생성 후, 아래와 같이 저장함
+    (2) upload the zipped package file into S3
 
     ```shell script
     $ aws s3 ls s3://image-insights-resources/var/
@@ -80,8 +83,8 @@ cdk를 실행할 때 사용할 IAM User를 생성한 후, `~/.aws/config`에 등
     2019-10-25 08:40:28    1294387 es-lib.zip
     ```
 
-    **참고**
-    + [Docker와 함께 시뮬레이션된 Lambda 환경을 사용하여 Lambda 계층을 생성하려면 어떻게 하나요? (How do I create a Lambda layer using a simulated Lambda environment with Docker?)](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-layer-simulated-docker/)
+    **Reference**
+    + [How to create a Lambda layer using a simulated Lambda environment with Docker](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-layer-simulated-docker/)
         ```
         $ cat <<EOF > requirements.txt
         > elasticsearch>=7.0.0,<7.11
@@ -94,7 +97,7 @@ cdk를 실행할 때 사용할 IAM User를 생성한 후, `~/.aws/config`에 등
         $ aws s3 cp es-lib.zip s3://my-bucket-for-lambda-layer-packages/var/
         ```
 
-3. 소스 코드를 git에서 다운로드 받은 후, 아래와 같이 cdk 배포 환경을 구축함
+3. Download source code from the git repository, and set up cdk environment
 
     ```shell script
     $ git clone https://github.com/aws-samples/aws-realtime-image-analysis.git
@@ -104,7 +107,7 @@ cdk를 실행할 때 사용할 IAM User를 생성한 후, `~/.aws/config`에 등
     (.env) $ pip install -r requirements.txt
     ```
 
-4. 아래와 같이 S3에 Read/Write를 할 수 있는 권한을 갖는 IAM User를 생성한 후, Access Key Id와 Secrect Key를 다운로드 받음
+4. Create an IAM User to be allowed to read/write S3, and take a note of both `Access Key Id` and `Secrect Key`.
    
    ```json
    {
@@ -125,8 +128,7 @@ cdk를 실행할 때 사용할 IAM User를 생성한 후, `~/.aws/config`에 등
    }
    ```
 
-5. `cdk.context.json` 파일을 열어서, `lib_bucket_name`에 Lambda Layer에 등록할 Python 패키지가 저장된 s3 bucket 이름을 적고,<br/>`image_bucket_name_suffix`에 업로드 된 이미지를
-저장하는 s3 bucket의 suffix를 넣는다.<br/>
+5. Set up `cdk.context.json` file like this:
 
     ```json
     {
@@ -137,24 +139,29 @@ cdk를 실행할 때 사용할 IAM User를 생성한 후, `~/.aws/config`에 등
     }
     ```
 
-6. `cdk deploy` 명령어를 이용해서 배포한다.
+    For example,
+
+    ```json
+    {
+      "image_bucket_name_suffix": "k7mdeng",
+      "lib_bucket_name": "lambda-layer-resources-use1",
+      "s3_access_key_id": "AKIAIOSFODNN7EXAMPLE",
+      "s3_secret_key": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+    }
+    ```
+
+6. Deploy by running `cdk deploy` command
     ```shell script
     (.env) $ cdk --profile=cdk_user deploy --all
     ```
 
-7. 배포한 애플리케이션을 삭제하려면, `cdk destroy` 명령어를 아래와 같이 실행
-    ```shell script
-    (.env) $ cdk --profile cdk_user destroy --all
-    ```
-
-8. 배포가 완료되면, API Gateway 웹 콘솔 접속해서 이미지 Uploader API의 **Binary Media Types** 설정이
-   정상적으로 되어 있는지 확인함
+7. Make sure **Binary Media Types** of the image uploader API is correct<br/>
    ![apigw-binary-media-types-setting](assets/apigw-binary-media-types-setting.png)
 
-9.  (Optional) VPC내에 생성된 ElasticSearch cluster에 ssh tunnel을 이용해서 접근할 수 있도록 위에서 생성한 VPC의 public subnet에 bastion host (ec2 인스턴스)가 생성되었는지 확인함
+8. (Optional) Find out the bastion host's public ip address.
     ![ec2-bastion-host-info](assets/ec2-bastion-host-info.png)
 
-10. (Optional) bastion host에서 사용 할 ssh key를 다음과 같이 생성함
+9. (Optional) Create ssh key for bastion host.
     ```shell script
     $ cd ~/.ssh
     $ ssh-keygen
@@ -183,7 +190,7 @@ cdk를 실행할 때 사용할 IAM User를 생성한 후, `~/.aws/config`에 등
     MY-KEY.pub
     ```
 
-11. (Optional) local 컴퓨터의 ssh config file에 아래 내용을 추가함 (`~/.ssh/config` on Mac, Linux)
+10. (Optional) To access the OpenSearch Cluster, add the ssh tunnel configuration to the ssh config file (`~/.ssh/config` on Mac, Linux) of the personal local PC as follows:
     ```shell script
     # Elasticsearch Tunnel
     Host estunnel
@@ -194,7 +201,8 @@ cdk를 실행할 때 사용할 IAM User를 생성한 후, `~/.aws/config`에 등
       LocalForward 9200 vpc-YOUR-ES-CLUSTER.us-east-1.es.amazonaws.com:443 # your ElasticSearch cluster endpoint
     ```
 
-12. (Optional) 다음과 같은 방식으로 ssh로 bastion host에 접근 할 수 있도록, public key를 bastion host에 보냄
+11. (Optional) Send the publick key of ssh to the bastion host.
+
     ```shell script
     $ cat send_ssh_publick_key.sh
     #!/bin/bash -
@@ -218,125 +226,71 @@ cdk를 실행할 때 사용할 IAM User를 생성한 후, `~/.aws/config`에 등
     }
     ```
 
-13. (Optional) local 컴퓨터에서 `ssh -N estunnel` 명령어를 실행함
+12. (Optional) Run `ssh -N estunnel` in the Terminal.
     ```shell script
     $ ssh -N estunnel
     ```
 
-14. (Optional) local 컴퓨터의 web browser (Chrome, Firefox 등)에서 아래 URL로 접속하면, ElasticSearch와 Kibana에 접근 할 수 있음
+13. (Optional) Connect to `https://localhost:9200/_dashboards/` in a web browser.
     - Search: `https://localhost:9200/`
-    - Kibana: `https://localhost:9200/_plugin/kibana/`
+    - Kibana: `https://localhost:9200/_dashboards/`
 
 
-### Kibana dashboards 그리기
-1. local 컴퓨터의 web browser (Chrome, Firefox 등)에서 `https://localhost:9200/_plugin/kibana/` 로 접속함
-2. Kibana toolbar에서 Managemant > Index Patterns 메뉴를 선택 해서, Index Pattern을 생성함 (예: image_insights)<br/>
+### Vizualization
+1. Connect to `https://localhost:9200/_dashboards/` in a web browser (Chrome, Firefox etc).
+2. In Kibana toolbar, select `Managemant > Index Patterns` menu, and create `Index Pattern` (e.g.,: image_insights)<br/>
     - (1) ![kibana-index-patterns-01](assets/kibana-index-patterns-01.png)
     - (2) ![kibana-index-patterns-02](assets/kibana-index-patterns-02.png)
 
-3. Kibana toolbar에서 Visualize 메뉴를 선택 함 (다음 순서로 그래프를 그림)<br/>
-    (a) Image Count 그리기
+3. Choose `Visualize` menu and create graphs<br/>
+    (a) Image Count<br/>
     - (1) ![kibana-visualize-01](assets/kibana-visualize-01.png)
     - (2) ![kibana-visualize-img-count-02](assets/kibana-visualize-img-count-02.png)
     - (3) ![kibana-visualize-img-count-03](assets/kibana-visualize-img-count-03.png)
     - (4) ![kibana-visualize-img-count-04](assets/kibana-visualize-img-count-04.png)
 
-    (b) Tag Cloud 그리기
+    (b) Tag Cloud<br/>
     - (1) ![kibana-visualize-tag-cloud-01](assets/kibana-visualize-tag-cloud-01.png)
     - (2) ![kibana-visualize-tag-cloud-02](assets/kibana-visualize-tag-cloud-02.png)
     - (3) ![kibana-visualize-tag-cloud-03](assets/kibana-visualize-tag-cloud-03.png)
 
-    (c) Tag Count 그리기
+    (c) Tag Count<br/>
     - (1) ![kibana-visualize-tag-count-01](assets/kibana-visualize-tag-count-01.png)
     - (2) ![kibana-visualize-tag-count-02](assets/kibana-visualize-tag-count-02.png)
     - (3) ![kibana-visualize-tag-count-03](assets/kibana-visualize-tag-count-03.png)
 
-    (d) Tag Pie Chart 그리기<br/>
+    (d) Tag Pie Chart<br/>
     - (1) ![kibana-visualize-tag-pie-chart-01](assets/kibana-visualize-tag-pie-chart-01.png)
     - (2) ![kibana-visualize-tag-pie-chart-02](assets/kibana-visualize-tag-pie-chart-02.png)
     - (3) ![kibana-visualize-tag-pie-chart-03](assets/kibana-visualize-tag-pie-chart-03.png)
 
-4. Kibana toolbar에서 Dashboard 메뉴를 선택 함 (다음 순서로 Dashboard에 앞서 생성한 그래프를 추가함)<br/>
+4. Make a dashboard out of the above graphs<br/>
     - (1) ![kibana-dashboard-01](assets/kibana-dashboard-01.png)
     - (2) ![kibana-dashboard-02](assets/kibana-dashboard-02.png)
     - (3) ![kibana-dashboard-03](assets/kibana-dashboard-03.png)
 
 
 ### Demo
-##### 이미지를 등록하는 방법
+#### How To Send images to APIs
 
-- **Postman을 이용해서 이미지 업로드 API로 명함을 등록하는 방법**
+- **Upload images through APIs with Postman**
 
-  1. Postman에서 아래 그림과 같이 Authorization 탭에서 TYPE을 AWS Signature로 선택하고, S3 Read/Write 권한을 가진 사용자의 
- AccessKey, SecretKey를 등록하고, AWS Region을 설정함<br/>
+  1. Set up the configuration of `Postman` like this:<br/>
   ![img-uploader-01](assets/img-uploader-01.png)
-  2. Headers 탭을 선택하고, Key, Value를 아래 그림과 같이 추가함<br/>
+  1. Set up `Headers`<br/>
   ![img-uploader-02](assets/img-uploader-02.png)
-  3. Body 탭에서 binary를 선택하고, Select File 버튼을 눌러서, 전송할 파일을 추가함<br/>
+  1. Choose `Body` tab and add a image as `binary` format by clicking `Select File`<br/>
   ![img-uploader-02](assets/img-uploader-03.png)
-  4. 전송할 이미지 파일이 추가한 후, Send 버튼을 눌러서 PUT 메소드를 실행함<br/>
+  1. Click `Send` to run the rest api `PUT` method<br/>
   ![img-uploader-02](assets/img-uploader-04.png)
 
-- **demo용 클라이언트를 사용하는 방법**
+### Clean Up
 
-  1. 업로드한 명함 이미지를 저장할 s3 bucket의 CORS 설정을 아래 처럼 변경함
-        ```
-        [
-            {
-                "AllowedHeaders": [
-                    "Authorization"
-                ],
-                "AllowedMethods": [
-                    "GET",
-                    "POST"
-                ],
-                "AllowedOrigins": [
-                    "*"
-                ],
-                "ExposeHeaders": [],
-                "MaxAgeSeconds": 3000
-            }
-        ]
-        ```
-        - ex)
-           ![s3_bucket_cors_configuration](assets/s3_bucket_cors_configuration_json.png)
+Delete the CloudFormation stack by running the below command.
 
-   2. [Serverless S3 Upload with Lambda Demo](https://github.com/Beomi/s3-direct-uploader-demo) 를 로컬 PC에 git clone 한 후, `app.js` 파일에서 `//TODO` 부분을 알맞게 수정함
-
-        ```js
-        var uploader = new qq.s3.FineUploader({
-            debug: false, // defaults to false
-            element: document.getElementById('fine-uploader'),
-            request: {
-                //TODO: S3 Bucket URL
-                endpoint: 'https://{s3-bucket-name}.s3.amazonaws.com',
-                //TODO: IAM User AccessKey
-                accessKey: '{IAM User AccessKey}'
-            },
-            objectProperties: {
-                //TODO: AWS Region name
-                region: '{region-name}',
-                key(fileId) {
-                    //TODO: S3 Bucket Prefix
-                    var prefixPath = '{s3-bucket-prefix}'
-                    var filename = this.getName(fileId)
-                    return prefixPath + '/' + filename
-                }
-            },
-            signature: {
-                // version
-                version: 4,
-                //TODO: AWS API Gateway Lambda Authorizers URL
-                endpoint: 'https://{api-gateway-id}.execute-api.{region-name}.amazonaws.com/{api-gateway-version}'
-            },
-            retry: {
-                enableAuto: true // defaults to false
-            }
-        });
-        ```
-
-   3. 수정한 이후, `index.html` 파일을 browser로 열어서 사용함
-
+  ```shell script
+  (.env) $ cdk --profile cdk_user destroy --all
+  ```
 
 ## Security
 

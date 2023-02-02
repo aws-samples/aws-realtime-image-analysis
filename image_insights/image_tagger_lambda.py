@@ -65,6 +65,9 @@ class ImageTaggerLambdaStack(Stack):
 
     log_group = aws_logs.LogGroup(self, "AutomaticImageTaggerLogGroup",
       log_group_name="/aws/lambda/AutomaticImageTagger",
+      removal_policy=cdk.RemovalPolicy.DESTROY, #XXX: for testing
       retention=aws_logs.RetentionDays.THREE_DAYS)
     log_group.grant_write(auto_img_tagger_lambda_fn)
+
+    cdk.CfnOutput(self, '{self.stack_name}_LambdaFunctionName', value=auto_img_tagger_lambda_fn.function_name)
 

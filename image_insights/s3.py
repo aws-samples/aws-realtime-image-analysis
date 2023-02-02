@@ -15,7 +15,7 @@ class ImageInsightsS3Stack(Stack):
   def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
     super().__init__(scope, construct_id, **kwargs)
 
-    s3_image_bucket_name_suffix = self.node.try_get_context('image_bucket_name_suffix')
+    s3_image_bucket_name_suffix = self.node.try_get_context('image_bucket_name_suffix') or cdk.Aws.ACCOUNT_ID
     s3_bucket = s3.Bucket(self, "s3bucket",
       bucket_name="image-insights-{region}-{suffix}".format(region=cdk.Aws.REGION, suffix=s3_image_bucket_name_suffix))
 
@@ -26,3 +26,6 @@ class ImageInsightsS3Stack(Stack):
     )
 
     self.s3_input_bucket = s3_bucket
+
+    cdk.CfnOutput(self, 'ImageRepository', value=self.s3_input_bucket.bucket_name)
+

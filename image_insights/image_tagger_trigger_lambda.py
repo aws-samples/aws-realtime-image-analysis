@@ -18,7 +18,7 @@ from aws_cdk.aws_lambda_event_sources import (
 
 class ImageTaggerTriggerLambdaStack(Stack):
 
-  def __init__(self, scope: Construct, construct_id: str, s3_bucket, img_kinesis_stream, **kwargs) -> None:
+  def __init__(self, scope: Construct, construct_id: str, img_kinesis_stream, **kwargs) -> None:
     super().__init__(scope, construct_id, **kwargs)
 
     # create lambda function
@@ -46,17 +46,16 @@ class ImageTaggerTriggerLambdaStack(Stack):
       ]
     ))
 
-    # assign notification for the s3 event type (ex: OBJECT_CREATED)
-    for suffix in ('.jpeg', 'png'):
-      s3_event_filter = s3.NotificationKeyFilter(prefix="raw-image/", suffix=suffix)
-      s3_event_source = S3EventSource(s3_bucket, events=[s3.EventType.OBJECT_CREATED], filters=[s3_event_filter])
-      trigger_img_tagger_lambda_fn.add_event_source(s3_event_source)
-
     #XXX: https://github.com/aws/aws-cdk/issues/2240
     # To avoid to create extra Lambda Functions with names like LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a
     # if log_retention=aws_logs.RetentionDays.THREE_DAYS is added to the constructor props
     log_group = aws_logs.LogGroup(self, "TriggerImageAutoTaggerLogGroup",
       log_group_name="/aws/lambda/TriggerImageAutoTagger",
+      removal_policy=cdk.RemovalPolicy.DESTROY, #XXX: for testing
       retention=aws_logs.RetentionDays.THREE_DAYS)
     log_group.grant_write(trigger_img_tagger_lambda_fn)
+
+    self.lambda_fn = trigger_img_tagger_lambda_fn
+
+    cdk.CfnOutput(self, '{self.stack_name}_LambdaFunctionName', value=self.lambda_fn.function_name)
 
