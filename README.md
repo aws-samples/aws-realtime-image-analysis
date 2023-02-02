@@ -31,13 +31,15 @@
     | URL Path parameters | Description | Required(Yes/No) | Data Type |
     |---------------------|-------------|------------------|-----------|
     | bucket | s3 bucket name | Yes | String |
-    | object | s3 object name (image file name) | Yes | String |
+    | object | s3 object name | Yes | String |
 
   - ex)
-    ```
-    curl -X PUT "https://t2e7cpvqvu.execute-api.us-east-1.amazonaws.com/v1/image-vaults/raw-image%2F20191101_125236.jpg" \
+    * bucket: image-valuts
+    * object: raw-image/20191101_125236.jpg (Percent-encoding: `raw-image%2F20191101_125236.jpg`)
+    <pre>
+    curl -X PUT "https://t2e7cpvqvu.execute-api.us-east-1.amazonaws.com/v1/image-valuts/raw-image%2F20191101_125236.jpg" \
          --data @20191101_125236.jpg
-    ```
+    </pre>
 
 - Response
   - No Data
@@ -275,14 +277,14 @@
 
 - **Upload images through APIs with Postman**
 
-  1. Set up the configuration of `Postman` like this:<br/>
+  1. In `Postman`, set up `Authorization` like this:<br/>
   ![img-uploader-01](assets/img-uploader-01.png)
   1. Set up `Headers`<br/>
   ![img-uploader-02](assets/img-uploader-02.png)
   1. Choose `Body` tab and add a image as `binary` format by clicking `Select File`<br/>
-  ![img-uploader-02](assets/img-uploader-03.png)
+  ![img-uploader-03](assets/img-uploader-03.png)
   1. Click `Send` to run the rest api `PUT` method<br/>
-  ![img-uploader-02](assets/img-uploader-04.png)
+  ![img-uploader-04](assets/img-uploader-04.png)
 
 ### Clean Up
 

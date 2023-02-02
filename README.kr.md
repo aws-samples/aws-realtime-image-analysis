@@ -34,10 +34,13 @@
     | object | s3 object 이름 | Yes | String |
 
   - ex)
-    ```
+    * bucket: image-valuts
+    * object: raw-image/20191101_125236.jpg (Percent-encoding: `raw-image%2F20191101_125236.jpg`)
+
+    <pre>
     curl -X PUT "https://t2e7cpvqvu.execute-api.us-east-1.amazonaws.com/v1/image-vaults/raw-image%2F20191101_125236.jpg" \
          --data @20191101_125236.jpg
-    ```
+    </pre>
 
 - Response
   - No Data
@@ -274,9 +277,9 @@ cdk를 실행할 때 사용할 IAM User를 생성한 후, `~/.aws/config`에 등
   2. Headers 탭을 선택하고, Key, Value를 아래 그림과 같이 추가함<br/>
   ![img-uploader-02](assets/img-uploader-02.png)
   3. Body 탭에서 binary를 선택하고, Select File 버튼을 눌러서, 전송할 파일을 추가함<br/>
-  ![img-uploader-02](assets/img-uploader-03.png)
+  ![img-uploader-03](assets/img-uploader-03.png)
   4. 전송할 이미지 파일이 추가한 후, Send 버튼을 눌러서 PUT 메소드를 실행함<br/>
-  ![img-uploader-02](assets/img-uploader-04.png)
+  ![img-uploader-04](assets/img-uploader-04.png)
 
 - **demo용 클라이언트를 사용하는 방법**
 
