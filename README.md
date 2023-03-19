@@ -233,18 +233,56 @@
     $ ssh -N estunnel
     ```
 
-13. (Optional) Connect to `https://localhost:9200/_dashboards/` in a web browser.
+13. (Optional) Connect to `https://localhost:9200/_dashboards/app/login?` in a web browser.
     - Search: `https://localhost:9200/`
-    - Kibana: `https://localhost:9200/_dashboards/`
+    - Kibana: `https://localhost:9200/_dashboards/app/login?`
 
+### Enable the Lambda function to ingest records into Amazon OpenSearch
+
+ The lambda function uses the delivery role to sign HTTP (Signature Version 4) requests before sending the data to the Amazon OpenSearch Service endpoint.
+
+ You manage Amazon OpenSearch Service fine-grained access control permissions using roles, users, and mappings.
+ This section describes how to create roles and set permissions for the lambda function.
+
+ Complete the following steps:
+
+1. Connect to `https://localhost:9200/_dashboards/app/login?` in a web browser.
+2. Enter the master user and password that you set up when you created the Amazon OpenSearch Service endpoint. The user and password is stored in the [AWS Secrets Manager](https://console.aws.amazon.com/secretsmanager/listsecrets) as a name such as `OpenSearchMasterUserSecret1-xxxxxxxxxxxx`.
+3. In the Welcome screen, click the toolbar icon to the left side of **Home** button. Choose **Security**.
+   ![ops-dashboards-sidebar-menu-security](./assets/ops-dashboards-sidebar-menu-security.png)
+4. Under **Security**, choose **Roles**.
+5. Choose **Create role**.
+6. Name your role; for example, `firehose_role`.
+7. For cluster permissions, add `cluster_composite_ops` and `cluster_monitor`.
+8.  Under **Index permissions**, choose **Index Patterns** and enter <i>index-name*</i>; for example, `retail-trans*`.
+9.  Under **Permissions**, add three action groups: `crud`, `create_index`, and `manage`.
+10. Choose **Create**.
+    ![ops-create-firehose_role](./assets/ops-create-firehose_role.png)
+
+In the next step, you map the IAM role that the lambda function uses to the role you just created.
+
+1.  Choose the **Mapped users** tab.
+    ![ops-role-mappings](./assets/ops-role-mappings.png)
+2.  Choose **Manage mapping** and under **Backend roles**,
+3.  For **Backend Roles**, enter the IAM ARN of the role the lambda function uses:
+    `arn:aws:iam::123456789012:role/UpsertToESServiceRole709-xxxxxxxxxxxx`.
+    ![ops-entries-for-firehose_role](./assets/ops-entries-for-firehose_role.png)
+4.  Choose **Map**.
+
+    **Note**: After OpenSearch Role mapping for the lambda function, you would not be supposed to meet a data delivery failure with the lambda function like this:
+
+    <pre>
+    [ERROR] AuthorizationException: AuthorizationException(403, 'security_exception', 'no permissions for [cluster:monitor/main] and User [name=arn:aws:iam::123456789012:role/UpsertToESServiceRole709-G1RQVRG80CQY, backend_roles=[arn:aws:iam::123456789012:role/UpsertToESServiceRole709-G1RQVRG80CQY], requestedTenant=null]')
+    </pre>
 
 ### Vizualization
-1. Connect to `https://localhost:9200/_dashboards/` in a web browser (Chrome, Firefox etc).
-2. In Kibana toolbar, select `Managemant > Index Patterns` menu, and create `Index Pattern` (e.g.,: image_insights)<br/>
+1. Connect to `https://localhost:9200/_dashboards/app/login?` in a web browser (Chrome, Firefox etc).
+2. Enter the master user and password that you set up when you created the Amazon OpenSearch Service endpoint. The user and password is stored in the [AWS Secrets Manager](https://console.aws.amazon.com/secretsmanager/listsecrets) as a name such as `OpenSearchMasterUserSecret1-xxxxxxxxxxxx`.
+3. In Kibana toolbar, select `Managemant > Index Patterns` menu, and create `Index Pattern` (e.g.,: image_insights)<br/>
     - (1) ![kibana-index-patterns-01](assets/kibana-index-patterns-01.png)
     - (2) ![kibana-index-patterns-02](assets/kibana-index-patterns-02.png)
 
-3. Choose `Visualize` menu and create graphs<br/>
+4. Choose `Visualize` menu and create graphs<br/>
     (a) Image Count<br/>
     - (1) ![kibana-visualize-01](assets/kibana-visualize-01.png)
     - (2) ![kibana-visualize-img-count-02](assets/kibana-visualize-img-count-02.png)
@@ -266,7 +304,7 @@
     - (2) ![kibana-visualize-tag-pie-chart-02](assets/kibana-visualize-tag-pie-chart-02.png)
     - (3) ![kibana-visualize-tag-pie-chart-03](assets/kibana-visualize-tag-pie-chart-03.png)
 
-4. Make a dashboard out of the above graphs<br/>
+5. Make a dashboard out of the above graphs<br/>
     - (1) ![kibana-dashboard-01](assets/kibana-dashboard-01.png)
     - (2) ![kibana-dashboard-02](assets/kibana-dashboard-02.png)
     - (3) ![kibana-dashboard-03](assets/kibana-dashboard-03.png)

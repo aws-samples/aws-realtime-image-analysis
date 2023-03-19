@@ -73,6 +73,7 @@ image_tagger_lambda = ImageTaggerLambdaStack(app,
   "ImageInsightsImageTaggerLambda",
   vpc_stack.vpc,
   image_tag_search_stack.search_domain_endpoint,
+  image_tag_search_stack.search_domain_arn,
   image_tag_search_stack.sg_search_client,
   kds_stack.kinesis_stream,
   env=AWS_ENV
