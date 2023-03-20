@@ -261,13 +261,13 @@
 
 In the next step, you map the IAM role that the lambda function uses to the role you just created.
 
-1.  Choose the **Mapped users** tab.
+11. Choose the **Mapped users** tab.
     ![ops-role-mappings](./assets/ops-role-mappings.png)
-2.  Choose **Manage mapping** and under **Backend roles**,
-3.  For **Backend Roles**, enter the IAM ARN of the role the lambda function uses:
+12. Choose **Manage mapping** and under **Backend roles**,
+13. For **Backend Roles**, enter the IAM ARN of the role the lambda function uses:
     `arn:aws:iam::123456789012:role/UpsertToESServiceRole709-xxxxxxxxxxxx`.
     ![ops-entries-for-firehose_role](./assets/ops-entries-for-firehose_role.png)
-4.  Choose **Map**.
+14. Choose **Map**.
 
     **Note**: After OpenSearch Role mapping for the lambda function, you would not be supposed to meet a data delivery failure with the lambda function like this:
 
